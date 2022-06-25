@@ -9,8 +9,8 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-// jet finder with double HF tagging
-//
+// this task is meant to study double heavy-quark jets via tagging 
+// of two fully reconstructed heavy-flavour hadrons or two HQs.
 // Author: Nima Zardoshti, Gian Michele Innocenti
 
 #include "Framework/runDataProcessing.h"
@@ -34,8 +34,9 @@ using namespace o2::framework::expressions;
 struct JetFinderDoubleHFTask {
   Produces<o2::aod::Jets> jetsTable;
   Produces<o2::aod::JetTrackConstituents> trackConstituents;
-  OutputObj<TH1F> hJetPt{"h_jet_pt"};
-  OutputObj<TH1F> hD0Pt{"h_D0_pt"};
+  OutputObj<TH1F> hptJets{"hptJets"}; // pT distribution of inclusive jets
+  OutputObj<TH1F> hptD0Jets{"hptD0Jets"}; // pt distribution of jets tagged with a D0 hadron
+  //OutputObj<TH1F> hptD0d0barJets{"hptD0d0barJets"}; // pt distribution of jets tagged with a D0D0bar
 
   std::vector<fastjet::PseudoJet> jets;
   std::vector<fastjet::PseudoJet> inputParticles;
@@ -43,9 +44,9 @@ struct JetFinderDoubleHFTask {
 
   void init(InitContext const&)
   {
-    hJetPt.setObject(new TH1F("h_jet_pt", "jet p_{T};p_{T} (GeV/#it{c})",
+    hptJets.setObject(new TH1F("hptJets", "jet p_{T};p_{T} (GeV/#it{c})",
                               100, 0., 100.));
-    hD0Pt.setObject(new TH1F("h_D0_pt", "jet p_{T,D};p_{T,D} (GeV/#it{c})",
+    hptD0Jets.setObject(new TH1F("hptD0Jets", "jet p_{T,D};p_{T,D} (GeV/#it{c})",
                              60, 0., 60.));
   }
 
@@ -97,9 +98,9 @@ struct JetFinderDoubleHFTask {
           for (const auto& constituent : jet.constituents()) {
             trackConstituents(jetsTable.lastIndex(), constituent.user_index());
           }
-          hJetPt->Fill(jet.pt());
+          hptJets->Fill(jet.pt());
           std::cout << "Filling" << std::endl;
-          hD0Pt->Fill(candidate.pt());
+          hptD0Jets->Fill(candidate.pt());
           break;
         }
       }
